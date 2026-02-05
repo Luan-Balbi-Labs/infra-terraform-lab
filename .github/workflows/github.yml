@@ -1,0 +1,58 @@
+name: Terraform GitHub Infra
+
+on:
+    workflow_dispatch:
+        inputs:
+            action:
+              description: 'Ação desejada'
+              required: true
+              type: choice
+              options:
+                  - create_repo
+                  - create_team
+                  - add_member
+                  - add_team_repo
+            repository_name:
+              description: 'Nome do repositório (para create_repo ou add_team_repo)'
+              required: false
+            team_name:
+              description: 'Nome do time (para create_team, add_member ou add_team_repo)'
+              required: false
+            team_members:
+              description: 'Membros do time (para add_member, separados por vírgula)'
+              required: false
+            team_permission:
+              description: 'Permissão do time no repositório (para add_team_repo)'
+              required: false
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_OWNER: ${{ secrets.GITHUB_OWNER }}
+      TF_VAR_github_token: ${{ secrets.GITHUB_TOKEN }}
+      TF_VAR_github_owner: ${{ secrets.GITHUB_OWNER }}
+      TF_VAR_repository_name: ${{ github.event.inputs.repository_name }}
+      TF_VAR_team_name: ${{ github.event.inputs.team_name }}
+      TF_VAR_team_members: ${{ github.event.inputs.team_members }}
+      TF_VAR_team_permission: ${{ github.event.inputs.team_permission }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./github
+
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ./github
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./github
