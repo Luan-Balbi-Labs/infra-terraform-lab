@@ -26,12 +26,18 @@ variable "team_name" {
 
 variable "team_members" {
   description = "Lista de usuários do time"
-  type        = list(string)
-  default     = []
+  type        = string
+  default     = ""
 }
 
 variable "team_permission" {
   description = "Permissão do time no repositório"
   type        = string
   default     = "push"
+}
+
+locals {
+  team_members_list = (
+    var.team_members == "" ? [] : split(",", var.team_members)
+  )
 }
