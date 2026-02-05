@@ -9,6 +9,11 @@ variable "github_owner" {
   type        = string
 }
 
+variable "action" {
+  description = "Ação desejada"
+  type        = string
+}
+
 variable "repository_name" {
   description = "Nome do repositório"
   type        = string
