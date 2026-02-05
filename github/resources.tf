@@ -13,9 +13,9 @@ resource "github_team" "team" {
 }
 
 resource "github_team_membership" "team_membership" {
-  for_each = var.action == "add_member" && var.team_name != "" && length(local.team_members_list) > 0 ? toset(local.team_members_list) : []
+  count = var.action == "add_member" && var.team_name != "" && length(local.team_members_list) > 0 ? length(local.team_members_list) : 0
   team_id  = github_team.team.id
-  username = each.value
+  username = local.team_members_list[count.index]
   role     = "member"
 }
 
