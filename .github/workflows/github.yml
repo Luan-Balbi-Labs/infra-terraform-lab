@@ -43,6 +43,53 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Criar arquivo de criação de repositório
+        if: ${{ github.event.inputs.action == 'create_repo' }}
+        run: |
+          cat <<EOF > github/resources/create_repo/${{ github.event.inputs.repository_name }}.tf
+          resource "github_repository" "repo" {
+            name        = ${{ github.event.inputs.repository_name }}
+            description = "Repositório gerenciado pelo Terraform"
+            visibility  = "public"
+          }
+          EOF
+
+      - name: Criar arquivo de criação de time
+        if: ${{ github.event.inputs.action == 'create_team' }}
+        run: |
+          cat <<EOF > github/resources/create_team/${{ github.event.inputs.team_name }}.tf
+          resource "github_team" "team" {
+            name        = ${{ github.event.inputs.team_name }}
+            description = "Time gerenciado pelo Terraform"
+            privacy     = "closed"
+          }
+          EOF
+
+      # - name: Criar arquivo de adicionar membro
+      #   if: ${{ github.event.inputs.action == 'add_member' }}
+      #   run: |
+      #     echo "team_name = \"${{ github.event.inputs.team_name }}\"" > github/add_member.auto.tfvars
+      #     echo "team_members = [\"${{ github.event.inputs.team_members }}\"]" >> github/add_member.auto.tfvars
+
+      # Commit e push
+      - name: Configurar git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Adicionar arquivos ao git
+        run: |
+          git add github/*
+
+      - name: Commitar arquivos
+        run: |
+          git commit -m "Arquivos gerados pela action ${{ github.event.inputs.action }}"
+
+      - name: Push
+        run: |
+          git push    
+      
+      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
